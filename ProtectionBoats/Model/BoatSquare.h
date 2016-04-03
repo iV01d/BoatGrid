@@ -13,6 +13,7 @@
 @property (nonatomic, readonly) BOOL isBoat;
 @property (nonatomic) NSUInteger x;
 @property (nonatomic) NSUInteger y;
+@property (nonatomic, strong) NSMutableOrderedSet *distances; // Distance to boats
 
 -(instancetype) initWithX:(NSInteger) x andY:(NSInteger) y;
 -(int) setSquareToBoat;

@@ -14,7 +14,7 @@
 
 @implementation BoatSquare
 
-@synthesize isBoat, x = _x, y = _y;
+@synthesize isBoat, x = _x, y = _y, distances = _distances;
 
 -(NSString *) description
 {
@@ -29,6 +29,17 @@
         ret = [NSString stringWithFormat:@"%li, %li", _x, _y];
     }
     return ret;
+}
+
+-(NSMutableOrderedSet *) distances
+{
+    if (_distances == nil)
+    {
+        NSMutableOrderedSet *set = [[NSMutableOrderedSet alloc] init];
+        _distances = set;
+    }
+    
+    return _distances;
 }
 
 -(int)setSquareToBoat
