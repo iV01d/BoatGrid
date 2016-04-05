@@ -33,46 +33,6 @@
     return self;
 }
 
--(NSArray *) generateBoatsForGrid
-{
-    NSMutableArray *result = [[NSMutableArray alloc] init];
-    
-    // Rows
-    for (int x = 1; x <= self.rows; x++)
-    {
-        //NSLog(@"Rows: %i", x);
-        for (int y = 1;  y <= self.cols; y++)
-        {
-            NSUInteger boatX;
-            NSUInteger boatY;
-            BOOL doBreak = NO;
-            for (BoatSquare *boat in self.boats)
-            {
-                boatX = boat.x;
-                boatY = boat.y;
-                if (x == boatX && y == boatY)
-                {
-                    doBreak = true;
-                    break;
-                }
-            }
-            
-            if (doBreak == true)
-            {
-                // Nothing
-            }
-            else
-            {
-                //NSLog(@"Columns: %i", y);
-                BoatSquare *rowBoat = [[BoatSquare alloc] initWithX:x andY:y];
-                [result addObject:rowBoat];
-            }
-        }
-    }
-    
-    return result;
-}
-
 -(NSMutableOrderedSet *) boats
 {
     if (_boats == nil)
@@ -128,15 +88,18 @@
     [[UIColor whiteColor] setFill];
     [box fill];
     
-    //NSArray *squares = [self generateBoatsForGrid];  // Array containing all the grid squares
+    if ([self.boats count] > 0)
+    {
+        NSArray *squares = [self createArrayContainingSquaresFromTheGrid];
+        [self calculateDistancesWithSquaresFromArray:squares];
+        [self drawCalculatedSquaresInRect:rect withArrayOfSquares:squares];
+    }
     
     // Draw Boats
     [self drawBoatsWithRect:rect];
     
     [[UIColor blackColor] setStroke];
     [box stroke];
-    
-    //[self drawCalculatedSquaresInRect:rect withArrayOfSquares:squares];
     
     UIBezierPath *rowsLine = [UIBezierPath bezierPath];
     
@@ -189,34 +152,101 @@
     }
 }
 
-#pragma mark - Doesn't Work Yet
-/*
 -(void) drawCalculatedSquaresInRect:(CGRect) rect withArrayOfSquares:(NSArray *)arrayOfSquares
 {
-    if (self.boats.count > 2)
+    NSMutableArray *colors = [[NSMutableArray alloc] init];
+    for (int i = 0; i <= [self.boats count]; i++)
     {
-        for (BoatSquare *square in arrayOfSquares)
+        [colors addObject:[self randomColor]];
+    }
+    
+    for (BoatSquare *square in arrayOfSquares)
+    {
+        NSNumber *gridSize = [[NSNumber alloc] initWithFloat:(self.cols * self.rows)];
+        NSNumber *largestNumber = gridSize; // Get largest number
+        for (long i = 0; i < [square.distances count]; i++)
         {
-            NSMutableArray *boatSquareStore =[[NSMutableArray alloc] init];
-            for (BoatSquare *boat in self.boats)
+            NSNumber *value = [square.distances objectAtIndex:i];
+            if (value < largestNumber)
             {
-                NSUInteger distanceUInt = [square calculateDistanceToSquare:boat];
-                NSNumber *distance = [[NSNumber alloc] initWithLong:distanceUInt];
-                [boatSquareStore addObject: distance];
-                
-                if ([boatSquareStore objectAtIndex:0] == [boatSquareStore objectAtIndex:1])
-                {
-                    NSLog(@"Yes, %@, %@",[boatSquareStore objectAtIndex:0], [boatSquareStore objectAtIndex:1]);
-                    CGRect matchSquare = CGRectMake((rect.size.width / self.rows) * (square.x - 1), (rect.size.height / self.cols) * (square.y - 1), rect.size.width / self.rows, rect.size.height / self.cols);
-                    
-                    UIBezierPath *matchedSquarePath = [UIBezierPath bezierPathWithRect:matchSquare];
-                    [[UIColor grayColor] setFill];
-                    [matchedSquarePath fill];
-                }
+                largestNumber = value;
             }
         }
+        
+        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+        paragraphStyle.alignment = NSTextAlignmentCenter;
+        
+        UIFont *numberFont = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
+        
+        NSAttributedString *distance = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@", largestNumber]
+                                                                       attributes:@{ NSFontAttributeName : numberFont,
+                                                                                     NSParagraphStyleAttributeName : paragraphStyle}];
+        
+        CGRect numberRect = CGRectMake((rect.size.width / self.rows) * (square.x - 1), (rect.size.height / self.cols) * (square.y - 1), rect.size.width / self.rows, rect.size.height / self.cols);
+        
+        UIBezierPath *numberPath = [UIBezierPath bezierPathWithRect:numberRect];
+        [[UIColor orangeColor] setFill];
+        [numberPath fill];
+        
+        CGRect textRect = CGRectMake(numberRect.origin.x, numberRect.origin.y + (numberRect.size.height / 3), numberRect.size.width, numberRect.size.height);
+        
+        [distance drawInRect:textRect];
     }
 }
- */
+
+-(NSArray *) createArrayContainingSquaresFromTheGrid
+{
+    NSMutableArray *result = [[NSMutableArray alloc] init];
+    
+    for (NSInteger x = 1; x <= self.rows; x++)
+    {
+        for (NSInteger yVal = 1; yVal <= self.cols; yVal++)
+        {
+            BoatSquare *square = [[BoatSquare alloc] init];
+            //NSLog(@"y val: %li", y);
+            
+            square.x = x;
+            square.y = yVal;
+            
+            if (square == nil)
+                break;
+            else
+                [result addObject:square];
+        }
+    }
+    
+    //NSLog(@"Square Array: %@", result);
+    
+    return result;
+}
+
+-(void) calculateDistancesWithSquaresFromArray:(NSArray *) array
+{
+    for (BoatSquare *boats in self.boats)
+    {
+        for (BoatSquare *squares in array)
+        {
+            NSInteger distance = [squares calculateDistanceToSquare:boats];
+            NSNumber *num = [[NSNumber alloc] initWithLong:distance];
+            [squares.distances addObject: num];
+        }
+    }
+     
+    BoatSquare *b = [[BoatSquare alloc] initWithX:1 andY:2];
+    NSInteger dis = [b calculateDistanceToSquare: [self.boats objectAtIndex:0]];
+    NSLog(@"Distance for test: %ld", dis);
+}
+
+-(UIColor *)randomColor
+{
+    switch (arc4random()%5) {
+        case 0: return [UIColor greenColor];
+        case 1: return [UIColor blueColor];
+        case 2: return [UIColor orangeColor];
+        case 3: return [UIColor redColor];
+        case 4: return [UIColor purpleColor];
+    }
+    return [UIColor blackColor];
+}
 
 @end
