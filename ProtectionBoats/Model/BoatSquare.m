@@ -84,9 +84,9 @@
 -(NSUInteger) calculateDistanceToSquare:(BoatSquare *)square
 {
     NSInteger heightOff = square.x - self.x;
-    NSInteger lengthOff = square.y - self.y;
+    NSInteger lengthOff = self.y - square.y;
     
-    NSInteger result = heightOff + lengthOff;
+    NSInteger result = labs(heightOff) + labs(lengthOff);
     
     if (result < 0)
     {
