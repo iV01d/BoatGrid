@@ -154,23 +154,46 @@
 
 -(void) drawCalculatedSquaresInRect:(CGRect) rect withArrayOfSquares:(NSArray *)arrayOfSquares
 {
-    NSMutableArray *colors = [[NSMutableArray alloc] init];
-    for (int i = 0; i <= [self.boats count]; i++)
+    for (BoatSquare *b in self.boats)
     {
-        [colors addObject:[self randomColor]];
+        b.sqaureColor = [self randomColor];
     }
     
     for (BoatSquare *square in arrayOfSquares)
     {
         NSNumber *gridSize = [[NSNumber alloc] initWithFloat:(self.cols * self.rows)];
         NSNumber *largestNumber = gridSize; // Get largest number
+        //NSLog(@"Distances: %@ for square, %@", square.distances, square);
+        
         for (long i = 0; i < [square.distances count]; i++)
         {
             NSNumber *value = [square.distances objectAtIndex:i];
             if (value < largestNumber)
             {
                 largestNumber = value;
+                square.sqaureColor = [[self.boats objectAtIndex:i] sqaureColor];
             }
+        }
+        
+        NSNumber *lastNum = [[NSNumber alloc] init];
+        int count = 0;
+        for (NSNumber *num in square.distances)
+        {
+            if (lastNum == nil)
+            {
+                count++;
+            }
+            else if ([num isEqualToNumber:lastNum])
+            {
+                count++;
+            }
+            
+            lastNum = [num copy];
+        }
+        
+        if (count >= 2)
+        {
+            square.sqaureColor = [UIColor whiteColor];
         }
         
         NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
@@ -185,7 +208,7 @@
         CGRect numberRect = CGRectMake((rect.size.width / self.rows) * (square.x - 1), (rect.size.height / self.cols) * (square.y - 1), rect.size.width / self.rows, rect.size.height / self.cols);
         
         UIBezierPath *numberPath = [UIBezierPath bezierPathWithRect:numberRect];
-        [[UIColor orangeColor] setFill];
+        [[square sqaureColor] setFill];
         [numberPath fill];
         
         CGRect textRect = CGRectMake(numberRect.origin.x, numberRect.origin.y + (numberRect.size.height / 3), numberRect.size.width, numberRect.size.height);
@@ -224,6 +247,7 @@
 {
     for (BoatSquare *boats in self.boats)
     {
+        //NSLog(@"Square: %@", boats);
         for (BoatSquare *squares in array)
         {
             NSInteger distance = [squares calculateDistanceToSquare:boats];
@@ -231,22 +255,25 @@
             [squares.distances addObject: num];
         }
     }
-     
-    BoatSquare *b = [[BoatSquare alloc] initWithX:1 andY:2];
-    NSInteger dis = [b calculateDistanceToSquare: [self.boats objectAtIndex:0]];
-    NSLog(@"Distance for test: %ld", dis);
+    
+    for (BoatSquare *square in array)
+    {
+        NSLog(@"Distances: %@", square.distances);
+    }
+    
 }
 
 -(UIColor *)randomColor
 {
-    switch (arc4random()%5) {
+    switch (arc4random()%6) {
         case 0: return [UIColor greenColor];
         case 1: return [UIColor blueColor];
         case 2: return [UIColor orangeColor];
         case 3: return [UIColor redColor];
         case 4: return [UIColor purpleColor];
+        case 5: return [UIColor yellowColor];
     }
-    return [UIColor blackColor];
+    return [UIColor grayColor];
 }
 
 @end

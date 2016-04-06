@@ -14,7 +14,7 @@
 
 @implementation BoatSquare
 
-@synthesize isBoat, x = _x, y = _y, distances = _distances;
+@synthesize isBoat, x = _x, y = _y, distances = _distances, sqaureColor = _sqaureColor;
 
 -(NSString *) description
 {
@@ -31,15 +31,26 @@
     return ret;
 }
 
--(NSMutableOrderedSet *) distances
+-(NSMutableArray *) distances
 {
     if (_distances == nil)
     {
-        NSMutableOrderedSet *set = [[NSMutableOrderedSet alloc] init];
-        _distances = set;
+        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        _distances = arr;
     }
     
     return _distances;
+}
+
+-(UIColor*) sqaureColor
+{
+    if (_sqaureColor == nil)
+    {
+        UIColor *color = [UIColor whiteColor];
+        _sqaureColor = color;
+    }
+    
+    return _sqaureColor;
 }
 
 -(int)setSquareToBoat
