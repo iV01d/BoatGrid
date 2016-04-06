@@ -189,9 +189,10 @@
             }
             
             lastNum = [num copy];
+            NSLog(@"Count: %i, SquareL %@", count, square);
         }
         
-        if (count >= 2)
+        if (count != 1)
         {
             square.sqaureColor = [UIColor whiteColor];
         }
